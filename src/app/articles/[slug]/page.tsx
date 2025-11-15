@@ -53,20 +53,20 @@ export default function ArticlePage() {
   }
 
   return (
-    <article className="container max-w-4xl mx-auto py-8 md:py-16">
+    <article className="container max-w-4xl mx-auto py-8 md:py-12 px-4">
       <header className="mb-8">
         <div className="flex flex-wrap gap-2 mb-4">
             {article.tags.map(tag => (
                 <Badge key={tag} variant="secondary" className="font-normal text-sm">{tag}</Badge>
             ))}
         </div>
-        <h1 className="font-headline text-4xl md:text-6xl font-bold leading-tight mb-4 text-gray-900 dark:text-gray-100">
+        <h1 className="font-headline text-3xl md:text-5xl font-bold leading-tight mb-4 text-gray-900 dark:text-gray-100">
           {article.title}
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground">
+        <p className="text-base md:text-lg text-muted-foreground">
           {article.summary}
         </p>
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
              {author && (
               <>
@@ -84,11 +84,11 @@ export default function ArticlePage() {
             )}
           </div>
            {loading ? (
-             <Button disabled variant="outline" className="w-32">
+             <Button disabled variant="outline" className="w-full sm:w-32">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
              </Button>
            ): user && (
-            <Button variant={isArticleSaved(article.id) ? "default" : "outline"} onClick={handleSaveClick}>
+            <Button variant={isArticleSaved(article.id) ? "default" : "outline"} onClick={handleSaveClick} className="w-full sm:w-auto">
                 <Bookmark className={`mr-2 h-4 w-4 ${isArticleSaved(article.id) ? "fill-current" : ""}`} />
                 {isArticleSaved(article.id) ? '저장됨' : '저장'}
             </Button>
@@ -111,20 +111,20 @@ export default function ArticlePage() {
 
       <div className="prose prose-lg dark:prose-invert max-w-none prose-p:text-foreground prose-headings:text-foreground prose-strong:text-foreground">
         {article.content.split('\n\n').map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
+          <p key={index} className="text-base leading-relaxed md:text-lg md:leading-relaxed">{paragraph}</p>
         ))}
       </div>
        <div className="mt-12 border-t pt-8">
             {author && (
-                <div className="flex items-center gap-4 rounded-lg bg-card p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-lg bg-card p-4 sm:p-6">
                      <Avatar className="h-16 w-16">
                         {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.name} data-ai-hint={authorAvatar.imageHint} />}
                         <AvatarFallback>{author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
-                    <div>
+                    <div className="text-center sm:text-left">
                         <p className="text-sm text-muted-foreground">작성자</p>
                         <h3 className="text-lg font-semibold">{author.name}</h3>
-                        <p className="mt-1 text-muted-foreground">{author.bio}</p>
+                        <p className="mt-1 text-muted-foreground text-sm">{author.bio}</p>
                     </div>
                 </div>
             )}

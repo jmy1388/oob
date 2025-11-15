@@ -25,25 +25,25 @@ function ProfilePageContent() {
 
     return (
         <div className="container mx-auto px-4 py-8 md:py-12">
-            <header className="flex flex-col md:flex-row items-center gap-8 mb-12">
-                <Avatar className="h-24 w-24 md:h-32 md:w-32 text-4xl">
+            <header className="flex flex-col items-center text-center md:flex-row md:text-left gap-6 md:gap-8 mb-12">
+                <Avatar className="h-24 w-24 md:h-28 md:w-28 text-4xl">
                     {avatarImage && <AvatarImage src={avatarImage.imageUrl} alt={user.name} data-ai-hint={avatarImage.imageHint} />}
                     <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
-                <div className="text-center md:text-left">
-                    <h1 className="font-headline text-4xl md:text-5xl">{user.name}</h1>
-                    <p className="mt-2 text-lg text-muted-foreground">{user.bio}</p>
+                <div>
+                    <h1 className="font-headline text-3xl md:text-4xl">{user.name}</h1>
+                    <p className="mt-2 text-base text-muted-foreground max-w-xl">{user.bio}</p>
                 </div>
             </header>
 
             <Tabs defaultValue={tab || "written"} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+                <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
                     <TabsTrigger value="written">내 기사</TabsTrigger>
                     <TabsTrigger value="saved">저장된 기사</TabsTrigger>
                 </TabsList>
-                <TabsContent value="written" className="mt-8">
+                <TabsContent value="written" className="mt-0">
                     {userArticles.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {userArticles.map((article, index) => (
                                 <ArticleCard
                                     key={article.id}
@@ -54,15 +54,15 @@ function ProfilePageContent() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 bg-card rounded-lg shadow-sm">
-                            <h3 className="font-headline text-2xl">아직 기사가 없습니다</h3>
+                        <div className="text-center py-16 md:py-20 bg-card rounded-lg shadow-sm">
+                            <h3 className="font-headline text-xl md:text-2xl">아직 기사가 없습니다</h3>
                             <p className="text-muted-foreground mt-2">아직 작성한 기사가 없습니다. 생각을 공유해 보세요!</p>
                         </div>
                     )}
                 </TabsContent>
-                <TabsContent value="saved" className="mt-8">
+                <TabsContent value="saved" className="mt-0">
                     {savedArticles.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                             {savedArticles.map((article, index) => (
                                 <ArticleCard
                                     key={article.id}
@@ -73,8 +73,8 @@ function ProfilePageContent() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 bg-card rounded-lg shadow-sm">
-                            <h3 className="font-headline text-2xl">저장된 기사 없음</h3>
+                        <div className="text-center py-16 md:py-20 bg-card rounded-lg shadow-sm">
+                            <h3 className="font-headline text-xl md:text-2xl">저장된 기사 없음</h3>
                             <p className="text-muted-foreground mt-2">피드를 둘러보고 나중에 읽을 기사를 저장하세요.</p>
                         </div>
                     )}
