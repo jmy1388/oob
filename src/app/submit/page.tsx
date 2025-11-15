@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -58,7 +59,7 @@ function SubmitPageContent() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 md:py-12">
+    <div className="container max-w-4xl mx-auto py-8 md:py-12 px-4 sm:px-6">
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-3xl">기사 제출</CardTitle>
