@@ -1,3 +1,64 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-1",
+      "description": "Avatar for Elena Vance",
+      "imageUrl": "https://images.unsplash.com/photo-1609505848912-b7c3b8b4beda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzEwMjI2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "user-2",
+      "description": "Avatar for Samuel Reed",
+      "imageUrl": "https://images.unsplash.com/photo-1624395213043-fa2e123b2656?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjMxOTUzOTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "user-3",
+      "description": "Avatar for Anya Petrova",
+      "imageUrl": "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBwcm9maWxlfGVufDB8fHx8MTc2MzA5OTc4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person profile"
+    },
+    {
+      "id": "article-1",
+      "description": "The Art of Mindful Living",
+      "imageUrl": "https://images.unsplash.com/photo-1566940564578-309d64952258?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx6ZW4lMjBnYXJkZW58ZW58MHx8fHwxNzYzMTQwODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "zen garden"
+    },
+    {
+      "id": "article-2",
+      "description": "Sustainable Energy Solutions for Urban Development",
+      "imageUrl": "https://images.unsplash.com/photo-1650180632789-2726525d1348?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc29sYXJ8ZW58MHx8fHwxNzYzMjA2NTExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city solar"
+    },
+    {
+      "id": "article-3",
+      "description": "The Science of Cooking",
+      "imageUrl": "https://images.unsplash.com/photo-1710261924580-e513dba07a6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtb2xlY3VsYXIlMjBnYXN0cm9ub215fGVufDB8fHx8MTc2MzIwNjUxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "molecular gastronomy"
+    },
+    {
+      "id": "article-4",
+      "description": "Exploring the Wonders of the Deep Sea",
+      "imageUrl": "https://images.unsplash.com/photo-1530053969600-caed2596d242?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkZWVwJTIwb2NlYW58ZW58MHx8fHwxNzYzMTQyMjA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "deep ocean"
+    },
+    {
+      "id": "article-5",
+      "description": "The Future of AI in Healthcare",
+      "imageUrl": "https://images.unsplash.com/photo-1631507623121-eaaba8d4e7dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhaSUyMGhlYWx0aGNhcmV8ZW58MHx8fHwxNzYzMTMxNDgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ai healthcare"
+    },
+    {
+      "id": "article-6",
+      "description": "Post-Modern Architecture",
+      "imageUrl": "https://images.unsplash.com/photo-1574848296471-28f79a036f79?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzYzMTMxNzcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "article-7",
+      "description": "The Philosophy of Stoicism",
+      "imageUrl": "https://images.unsplash.com/photo-1570482960841-8b75c1a9f410?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxyb21hbiUyMHN0YXR1ZXxlbnwwfHx8fDE3NjMxOTMxMzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "roman statue"
+    }
+  ]
 }
