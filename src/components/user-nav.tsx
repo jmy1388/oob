@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -18,8 +19,16 @@ import { getImage } from '@/lib/data';
 
 export function UserNav() {
   const { user, logout } = useAuth();
-  if (!user) return null;
+  const [isClient, setIsClient] = useState(false);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient || !user) {
+    return null;
+  }
+  
   const userInitials = user.displayName ? user.displayName.split(' ').map(n => n[0]).join('') : (user.email ? user.email[0].toUpperCase() : 'U');
 
   return (
