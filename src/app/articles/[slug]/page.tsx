@@ -48,8 +48,8 @@ export default function ArticlePage() {
     }
     toggleSaveArticle(article.id);
     toast({
-        title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "기사 저장됨!",
-        description: isArticleSaved(article.id) ? "읽기 목록에서 제거되었습니다." : "읽기 목록에 추가되었습니다.",
+        title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "읽기 목록에서 제거되었습니다.",
+        description: isArticleSaved(article.id) ? "읽기 목록에 추가되었습니다." : "읽기 목록에 추가되었습니다.",
     })
   }
 
