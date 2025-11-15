@@ -1,14 +1,21 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import Logo from './logo';
 import { UserNav } from './user-nav';
 import { PlusCircle } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
 
 export default function Header() {
   const { user, loading } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,7 +27,12 @@ export default function Header() {
         </div>
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {loading ? null : user ? (
+          {!isClient || loading ? (
+            <div className="flex items-center space-x-2">
+              <Skeleton className="h-8 w-24 rounded-md" />
+              <Skeleton className="h-10 w-10 rounded-full" />
+            </div>
+          ) : user ? (
             <>
               <Button asChild variant="ghost">
                 <Link href="/submit">
