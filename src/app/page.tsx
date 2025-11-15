@@ -56,11 +56,13 @@ function PersonalizedFeed() {
   if (isLoading) {
       return (
         <div className="mb-12">
+          <div className="container mx-auto px-4 sm:px-6">
             <h2 className="font-headline text-2xl md:text-3xl mb-6">회원님을 위한 추천</h2>
-            <div className="flex items-center justify-center text-muted-foreground p-8">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                <span>마음에 드실 만한 기사를 찾고 있습니다...</span>
-            </div>
+          </div>
+          <div className="flex items-center justify-center text-muted-foreground p-8">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <span>마음에 드실 만한 기사를 찾고 있습니다...</span>
+          </div>
         </div>
       )
   }
@@ -71,16 +73,20 @@ function PersonalizedFeed() {
 
   return (
     <div className="mb-12">
-      <h2 className="font-headline text-2xl md:text-3xl mb-6">회원님을 위한 추천</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {recommendations.map((article, index) => (
-          <ArticleCard
-            key={article.id}
-            article={article}
-            author={getAuthor(article.authorId)}
-            index={index}
-          />
-        ))}
+       <div className="container mx-auto px-4 sm:px-6">
+        <h2 className="font-headline text-2xl md:text-3xl mb-6">회원님을 위한 추천</h2>
+      </div>
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {recommendations.map((article, index) => (
+            <ArticleCard
+                key={article.id}
+                article={article}
+                author={getAuthor(article.authorId)}
+                index={index}
+            />
+            ))}
+        </div>
       </div>
     </div>
   );
@@ -104,30 +110,32 @@ export default function Home() {
   }, [searchTerm]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-6 md:py-10">
-      <header className="text-center mb-8 md:mb-12">
-        <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl mb-4 text-primary">oob</h1>
-        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-          모든 주제에 대한 작가들의 이야기, 생각, 전문 지식을 만나보세요.
-        </p>
-      </header>
+    <div className="py-6 md:py-10">
+      <div className="container mx-auto px-4 sm:px-6">
+        <header className="text-center mb-8 md:mb-12">
+            <h1 className="font-headline text-4xl sm:text-5xl md:text-6xl mb-4 text-primary">oob</h1>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+            모든 주제에 대한 작가들의 이야기, 생각, 전문 지식을 만나보세요.
+            </p>
+        </header>
 
-      <div className="mb-8 md:mb-12 max-w-lg mx-auto">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="제목, 저자 또는 태그로 기사 검색..."
-            className="pl-12 w-full h-12 text-base rounded-full shadow-sm"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
+        <div className="mb-8 md:mb-12 max-w-lg mx-auto">
+            <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="제목, 저자 또는 태그로 기사 검색..."
+                className="pl-12 w-full h-12 text-base rounded-full shadow-sm"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+            />
+            </div>
         </div>
       </div>
       
       <PersonalizedFeed />
 
-      <div>
+      <div className="container mx-auto px-4 sm:px-6">
         <h2 className="font-headline text-2xl md:text-3xl mb-6">
           {searchTerm ? '검색 결과' : '모든 기사'}
         </h2>
