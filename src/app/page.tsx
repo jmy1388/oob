@@ -2,13 +2,16 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import { Input } from '@/components/ui/input';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, PenSquare } from 'lucide-react';
 import ArticleCard from '@/components/article-card';
-import { getArticles, getAuthor } from '@/lib/data';
+import { getArticles, getAuthor, getImage } from '@/lib/data';
 import type { Article, User } from '@/lib/data';
 import { useAuth } from '@/hooks/use-auth';
 import { getPersonalizedArticleRecommendations } from '@/ai/flows/personalized-article-recommendations';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 const allArticles = getArticles();
 const allAuthors = allArticles.map(article => getAuthor(article.authorId)).filter(Boolean) as User[];
@@ -92,6 +95,38 @@ function PersonalizedFeed() {
   );
 }
 
+function WriteArticleCta() {
+    const { user } = useAuth();
+    if (!user) return null;
+
+    const userInitials = user.displayName ? user.displayName.split(' ').map(n => n[0]).join('') : (user.email ? user.email[0].toUpperCase() : 'U');
+
+    return (
+        <div className="my-8 md:my-12">
+            <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+                <div className="bg-card border rounded-lg p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                    <Avatar className="h-12 w-12 hidden sm:flex">
+                        {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />}
+                        <AvatarFallback>{userInitials}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-foreground">당신의 이야기를 공유해보세요</h3>
+                        <p className="text-muted-foreground text-sm mt-1">
+                           당신의 아이디어를 기사로 만들어 세상과 소통하세요.
+                        </p>
+                    </div>
+                    <Button asChild className="w-full sm:w-auto mt-4 sm:mt-0">
+                        <Link href="/submit">
+                            <PenSquare className="mr-2 h-4 w-4" />
+                            글쓰기
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -134,6 +169,7 @@ export default function Home() {
       </div>
       
       <PersonalizedFeed />
+      <WriteArticleCta />
 
       <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
         <h2 className="font-headline text-2xl md:text-3xl mb-6">
