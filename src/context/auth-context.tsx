@@ -8,6 +8,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
+    updateProfile,
     User as FirebaseUser
 } from 'firebase/auth';
 import { useFirebase } from '@/firebase';
@@ -68,13 +69,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (name: string, email: string, password?: string) => {
     if (!password) throw new Error("Password is required for email signup.");
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // You might want to update the user's profile with the name here
-    // For now, we are not storing extra user info in firestore
+    
+    if (userCredential.user) {
+      await updateProfile(userCredential.user, { displayName: name });
+      
+      addUser({
+          name: name,
+          email: email,
+          avatarId: `user-${Math.ceil(Math.random() * 3)}`,
+          bio: '새로운 작가입니다! 제 이야기를 세상과 공유하게 되어 기쁩니다.'
+      });
+    }
   }
   
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    const googleUser = result.user;
+
+    if (googleUser && googleUser.email) {
+        const existingUser = findUser(googleUser.email);
+        if (!existingUser) {
+            addUser({
+                name: googleUser.displayName || 'New User',
+                email: googleUser.email,
+                avatarId: `user-${Math.ceil(Math.random() * 3)}`,
+                bio: 'Joined through Google! Excited to share my stories.'
+            });
+        }
+    }
   };
 
   const logout = async () => {

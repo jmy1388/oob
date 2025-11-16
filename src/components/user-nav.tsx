@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { CreditCard, LogOut, PlusCircle, Bookmark, User as UserIcon } from 'lucide-react';
-import { getImage } from '@/lib/data';
 
 export function UserNav() {
   const { user, logout } = useAuth();
@@ -26,6 +25,7 @@ export function UserNav() {
   }, []);
 
   if (!isClient || !user) {
+    // Render nothing or a placeholder on the server and during initial client render
     return null;
   }
   
