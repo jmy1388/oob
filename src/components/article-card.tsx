@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -5,28 +6,21 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import type { Article, UserProfile } from '@/lib/data';
+import type { Article } from '@/lib/data';
 import { getImage } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
-
 
 interface ArticleCardProps {
   article: Article;
-  authorId: string;
+  authorUsername?: string;
   index: number;
 }
 
-function AuthorDetails({ authorId }: { authorId: string }) {
-    const { firestore } = useFirebase();
-    const authorRef = useMemoFirebase(() => doc(firestore, 'users', authorId), [firestore, authorId]);
-    const { data: author, isLoading } = useDoc<UserProfile>(authorRef);
-
-    if (isLoading) {
+function AuthorDetails({ authorUsername, createdAt }: { authorUsername?: string, createdAt: string }) {
+    if (!authorUsername) {
         return (
             <div className="flex items-center gap-3">
                 <Skeleton className="h-10 w-10 rounded-full" />
@@ -37,31 +31,26 @@ function AuthorDetails({ authorId }: { authorId: string }) {
             </div>
         )
     }
-
-    if (!author) {
-        return null;
-    }
     
     const authorAvatar = getImage('user-1'); // Placeholder
 
     return (
         <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-                {authorAvatar && <AvatarImage src={author.photoURL || authorAvatar.imageUrl} alt={author.username} data-ai-hint={authorAvatar.imageHint}/>}
-                <AvatarFallback>{author.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={authorUsername} data-ai-hint={authorAvatar.imageHint}/>}
+                <AvatarFallback>{authorUsername.split(' ').map(n => n[0]).join('')}</AvatarFallback>
             </Avatar>
             <div>
-                <p className="font-semibold text-sm">{author.username}</p>
+                <p className="font-semibold text-sm">{authorUsername}</p>
                 <p className="text-xs text-muted-foreground">
-                    {/* Assuming createdAt is a Firestore Timestamp */}
-                    {format(new Date(), 'yyyy년 M월 d일', { locale: ko })}
+                    {format(new Date(createdAt), 'yyyy년 M월 d일', { locale: ko })}
                 </p>
             </div>
         </div>
     )
 }
 
-export default function ArticleCard({ article, authorId, index }: ArticleCardProps) {
+export default function ArticleCard({ article, authorUsername, index }: ArticleCardProps) {
   const image = getImage(article.imageId);
 
   return (
@@ -99,7 +88,7 @@ export default function ArticleCard({ article, authorId, index }: ArticleCardPro
         <p className="text-muted-foreground text-sm line-clamp-3">{article.summary}</p>
       </CardContent>
       <CardFooter className="p-6 pt-0">
-        <AuthorDetails authorId={authorId} />
+        <AuthorDetails authorUsername={authorUsername} createdAt={article.createdAt} />
       </CardFooter>
     </Card>
   );

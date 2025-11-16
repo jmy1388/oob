@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/context/auth-context';
 import Header from '@/components/header';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
@@ -27,13 +26,11 @@ export default function RootLayout({
       </head>
       <body className={cn('min-h-screen bg-background font-body antialiased flex flex-col')}>
         <FirebaseClientProvider>
-          <AuthProvider>
             <div className="relative flex min-h-screen flex-col">
               <Header />
               <main className="flex-1">{children}</main>
             </div>
             <Toaster />
-          </AuthProvider>
         </FirebaseClientProvider>
       </body>
     </html>

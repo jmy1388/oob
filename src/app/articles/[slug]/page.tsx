@@ -9,28 +9,21 @@ import { ko } from 'date-fns/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bookmark, Heart, Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { useCollection, useDoc, useFirebase, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { Heart, Loader2 } from 'lucide-react';
+import { useFirebase, useCollection, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { collection, query, where, doc, increment } from 'firebase/firestore';
-import type { Article, UserProfile } from '@/lib/data';
+import type { Article } from '@/lib/data';
 import { getImage } from '@/lib/data';
 
 export default function ArticlePage() {
   const params = useParams();
   const slug = params.slug as string;
   
-  const { user, loading: authLoading, isArticleSaved, toggleSaveArticle, addReadingHistory, userProfile } = useAuth();
-  const { toast } = useToast();
   const { firestore } = useFirebase();
 
   const articlesQuery = useMemoFirebase(() => query(collection(firestore, 'articles'), where('slug', '==', slug)), [firestore, slug]);
   const { data: articles, isLoading: articlesLoading } = useCollection<Article>(articlesQuery);
   const article = articles?.[0];
-
-  const authorRef = useMemoFirebase(() => article ? doc(firestore, 'users', article.authorId) : null, [firestore, article]);
-  const { data: author, isLoading: authorLoading } = useDoc<UserProfile>(authorRef);
 
   const [isLiked, setIsLiked] = useState(false);
   
@@ -41,13 +34,7 @@ export default function ArticlePage() {
     }
   }, [article]);
   
-  useEffect(() => {
-    if(article && user) {
-        addReadingHistory(article.id);
-    }
-  }, [article, user, addReadingHistory]);
-  
-  if (articlesLoading || authorLoading) {
+  if (articlesLoading) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
   }
   
@@ -56,24 +43,8 @@ export default function ArticlePage() {
   }
 
   const image = getImage(article.imageId);
-  const authorAvatar = author ? getImage('user-1') : undefined; // Placeholder avatar logic
+  const authorAvatar = article.authorUsername ? getImage('user-1') : undefined; // Placeholder avatar logic
   
-  const handleSaveClick = () => {
-    if (!user) {
-        toast({
-            variant: "destructive",
-            title: "로그인 해주세요",
-            description: "기사를 저장하려면 로그인이 필요합니다.",
-        });
-        return;
-    }
-    toggleSaveArticle(article.id);
-    toast({
-        title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "읽기 목록에 추가되었습니다.",
-        description: isArticleSaved(article.id) ? "읽기 목록에서 제거되었습니다." : "읽기 목록에 추가되었습니다.",
-    })
-  }
-
   const handleLikeClick = () => {
     if (!article) return;
     const articleRef = doc(firestore, 'articles', article.id);
@@ -101,33 +72,21 @@ export default function ArticlePage() {
         <p className="text-base md:text-lg text-muted-foreground">
           {article.summary}
         </p>
-        <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-             {author && (
+        <div className="mt-6 flex items-center gap-4">
+             {article.authorUsername && (
               <>
                 <Avatar className="h-12 w-12">
-                   {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.username} data-ai-hint={authorAvatar.imageHint} />}
-                  <AvatarFallback>{author.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                   {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={article.authorUsername} data-ai-hint={authorAvatar.imageHint} />}
+                  <AvatarFallback>{article.authorUsername.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{author.username}</p>
+                  <p className="font-semibold">{article.authorUsername}</p>
                   <p className="text-sm text-muted-foreground">
                     게시일: {format(new Date(article.createdAt), 'yyyy년 M월 d일', { locale: ko })}
                   </p>
                 </div>
               </>
             )}
-          </div>
-           {authLoading ? (
-             <Button disabled variant="outline" className="w-full sm:w-32">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-             </Button>
-           ): user && (
-            <Button variant={isArticleSaved(article.id) ? "default" : "outline"} onClick={handleSaveClick} className="w-full sm:w-auto">
-                <Bookmark className={`mr-2 h-4 w-4 ${isArticleSaved(article.id) ? "fill-current" : ""}`} />
-                {isArticleSaved(article.id) ? '저장됨' : '저장'}
-            </Button>
-           )}
         </div>
       </header>
 
@@ -164,16 +123,15 @@ export default function ArticlePage() {
        </div>
 
        <div className="mt-12 border-t pt-8">
-            {author && (
+            {article.authorUsername && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-lg bg-card p-4 sm:p-6">
                      <Avatar className="h-16 w-16">
-                        {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.username} data-ai-hint={authorAvatar.imageHint} />}
-                        <AvatarFallback>{author.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={article.authorUsername} data-ai-hint={authorAvatar.imageHint} />}
+                        <AvatarFallback>{article.authorUsername.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="text-center sm:text-left">
                         <p className="text-sm text-muted-foreground">작가</p>
-                        <h3 className="text-lg font-semibold">{author.username}</h3>
-                        <p className="mt-1 text-muted-foreground text-sm">{author.bio}</p>
+                        <h3 className="text-lg font-semibold">{article.authorUsername}</h3>
                     </div>
                 </div>
             )}
