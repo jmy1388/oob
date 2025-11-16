@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
@@ -10,7 +10,7 @@ import { getArticleBySlug, getAuthor, getImage } from '@/lib/data';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bookmark, Loader2 } from 'lucide-react';
+import { Bookmark, Heart, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,6 +22,10 @@ export default function ArticlePage() {
   const { toast } = useToast();
 
   const article = getArticleBySlug(slug);
+
+  // 좋아요 상태 관리
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Math.floor(Math.random() * 100)); // 초기 좋아요 수는 랜덤으로 설정
 
   useEffect(() => {
     if(article && user) {
@@ -51,6 +55,15 @@ export default function ArticlePage() {
         title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "읽기 목록에서 제거되었습니다.",
         description: isArticleSaved(article.id) ? "읽기 목록에 추가되었습니다." : "읽기 목록에 추가되었습니다.",
     })
+  }
+
+  const handleLikeClick = () => {
+    if (isLiked) {
+      setLikeCount(likeCount - 1);
+    } else {
+      setLikeCount(likeCount + 1);
+    }
+    setIsLiked(!isLiked);
   }
 
   return (
@@ -115,6 +128,16 @@ export default function ArticlePage() {
           <p key={index} className="text-base leading-relaxed md:text-lg md:leading-relaxed">{paragraph}</p>
         ))}
       </div>
+
+       <div className="mt-8 pt-8 border-t flex justify-center">
+            <div className="flex flex-col items-center gap-2">
+                <Button variant="outline" size="icon" className="rounded-full h-14 w-14" onClick={handleLikeClick}>
+                    <Heart className={`h-6 w-6 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+                </Button>
+                <span className="text-sm text-muted-foreground">{likeCount}명이 좋아합니다</span>
+            </div>
+       </div>
+
        <div className="mt-12 border-t pt-8">
             {author && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-lg bg-card p-4 sm:p-6">
