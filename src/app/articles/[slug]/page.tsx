@@ -6,44 +6,56 @@ import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { getArticleBySlug, getAuthor, getImage } from '@/lib/data';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Bookmark, Heart, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import { useCollection, useDoc, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection, query, where, doc } from 'firebase/firestore';
+import type { Article, UserProfile } from '@/lib/data';
+import { getImage } from '@/lib/data';
 
 export default function ArticlePage() {
   const params = useParams();
   const slug = params.slug as string;
   
-  const { user, loading, isArticleSaved, toggleSaveArticle, addReadingHistory } = useAuth();
+  const { user, loading: authLoading, isArticleSaved, toggleSaveArticle, addReadingHistory, userProfile } = useAuth();
   const { toast } = useToast();
+  const { firestore } = useFirebase();
 
-  const article = getArticleBySlug(slug);
+  const articlesQuery = useMemoFirebase(() => query(collection(firestore, 'articles'), where('slug', '==', slug)), [firestore, slug]);
+  const { data: articles, isLoading: articlesLoading } = useCollection<Article>(articlesQuery);
+  const article = articles?.[0];
 
-  // 좋아요 상태 관리
+  const authorRef = useMemoFirebase(() => article ? doc(firestore, 'users', article.authorId) : null, [firestore, article]);
+  const { data: author, isLoading: authorLoading } = useDoc<UserProfile>(authorRef);
+
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState<number | null>(null);
 
   useEffect(() => {
+    // This should only run on the client
     setLikeCount(Math.floor(Math.random() * 100));
   }, []);
-
+  
   useEffect(() => {
     if(article && user) {
         addReadingHistory(article.id);
     }
   }, [article, user, addReadingHistory]);
   
+  if (articlesLoading || authorLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
+  }
+  
   if (!article) {
     notFound();
   }
 
-  const author = getAuthor(article.authorId);
   const image = getImage(article.imageId);
-  const authorAvatar = author ? getImage(author.avatarId) : undefined;
+  const authorAvatar = author ? getImage('user-1') : undefined; // Placeholder avatar logic
   
   const handleSaveClick = () => {
     if (!user) {
@@ -56,8 +68,8 @@ export default function ArticlePage() {
     }
     toggleSaveArticle(article.id);
     toast({
-        title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "읽기 목록에서 제거되었습니다.",
-        description: isArticleSaved(article.id) ? "읽기 목록에 추가되었습니다." : "읽기 목록에 추가되었습니다.",
+        title: isArticleSaved(article.id) ? "기사 저장 취소됨" : "읽기 목록에 추가되었습니다.",
+        description: isArticleSaved(article.id) ? "읽기 목록에서 제거되었습니다." : "읽기 목록에 추가되었습니다.",
     })
   }
 
@@ -89,11 +101,11 @@ export default function ArticlePage() {
              {author && (
               <>
                 <Avatar className="h-12 w-12">
-                   {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.name} data-ai-hint={authorAvatar.imageHint} />}
-                  <AvatarFallback>{author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                   {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.username} data-ai-hint={authorAvatar.imageHint} />}
+                  <AvatarFallback>{author.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold">{author.name}</p>
+                  <p className="font-semibold">{author.username}</p>
                   <p className="text-sm text-muted-foreground">
                     게시일: {format(new Date(article.createdAt), 'yyyy년 M월 d일', { locale: ko })}
                   </p>
@@ -101,7 +113,7 @@ export default function ArticlePage() {
               </>
             )}
           </div>
-           {loading ? (
+           {authLoading ? (
              <Button disabled variant="outline" className="w-full sm:w-32">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
              </Button>
@@ -150,12 +162,12 @@ export default function ArticlePage() {
             {author && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 rounded-lg bg-card p-4 sm:p-6">
                      <Avatar className="h-16 w-16">
-                        {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.name} data-ai-hint={authorAvatar.imageHint} />}
-                        <AvatarFallback>{author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={author.username} data-ai-hint={authorAvatar.imageHint} />}
+                        <AvatarFallback>{author.username.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className="text-center sm:text-left">
                         <p className="text-sm text-muted-foreground">작가</p>
-                        <h3 className="text-lg font-semibold">{author.name}</h3>
+                        <h3 className="text-lg font-semibold">{author.username}</h3>
                         <p className="mt-1 text-muted-foreground text-sm">{author.bio}</p>
                     </div>
                 </div>

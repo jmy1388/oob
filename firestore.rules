@@ -1,102 +1,24 @@
-/**
- * @fileoverview Firestore Security Rules for the oob application.
- *
- * Core Philosophy:
- * This ruleset enforces a user-ownership model for user profiles and an
- * author-ownership model for articles. Users can only access their own profile
- * data, while articles are publicly readable but only editable/deletable by
- * their author.  This design prioritizes simplicity and performance by
- * denormalizing ownership directly onto the secured documents, avoiding costly
- * `get()` calls.
- *
- * Data Structure:
- * - User profiles are stored under `/users/{userId}`, where `{userId}` matches
- *   the Firebase Auth UID.
- * - Articles are stored under `/articles/{articleId}`, with an `authorId` field
- *   indicating the article's author.
- *
- * Key Security Decisions:
- * - User listing is disallowed to protect privacy.
- * - Public read access is granted for articles to enable wide distribution.
- * - Missing ownership fields will halt rule deployment with a `TODO` reminder.
- *
- * Denormalization for Authorization:
- * - The `articles` collection uses the `authorId` field to enable owner-only
- *   writes.
- *
- * Structural Segregation:
- * - User profiles and articles are stored in separate collections to allow
- *   independent access control.
- */
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Controls access to user profile documents.
-     * @path /users/{userId}
-     * @allow (create) User with UID 'user_abc' can create their profile document.
-     *        Request: { auth.uid: 'user_abc', resource.data.id: 'user_abc' }
-     * @allow (get, list, update, delete) User with UID 'user_abc' can access their own profile.
-     *        Request: { auth.uid: 'user_abc', resource.data.id: 'user_abc' }
-     * @deny (create) User with UID 'user_abc' cannot create a profile for 'user_def'.
-     *       Request: { auth.uid: 'user_abc', resource.data.id: 'user_def' }
-     * @deny (get, list, update, delete) User with UID 'user_abc' cannot access profile of user 'user_def'.
-     *        Request: { auth.uid: 'user_abc', resource.data.id: 'user_def' }
-     * @principle Enforces document ownership for all operations on user profiles.
-     */
+    function isSignedIn() {
+        return request.auth != null;
+    }
+    
+    // User can only read and write to their own user document
     match /users/{userId} {
-      // Allow the user to read their own profile
-      allow get: if isOwner(userId);
-      // Allow the user to list their own profile, although there will only be one
-      allow list: if isOwner(userId);
-
-      // Allow the user to create their own profile, enforcing that the userId matches the auth.uid
-      allow create: if isSignedIn() && request.auth.uid == userId && request.resource.data.id == userId;
-
-      // Allow the user to update their own profile, enforcing immutability of the userId
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-
-      // Allow the user to delete their own profile
-      allow delete: if isExistingOwner(userId);
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
     }
 
-    /**
-     * @description Controls access to article documents.
-     * @path /articles/{articleId}
-     * @allow (get, list) Any user can read or list articles.
-     * @allow (create) User with UID 'user_abc' can create an article with authorId 'user_abc'.
-     *        Request: { auth.uid: 'user_abc', resource.data.authorId: 'user_abc' }
-     * @allow (update, delete) User with UID 'user_abc' can modify/delete their own article (authorId matches).
-     *        Request: { auth.uid: 'user_abc', resource.data.authorId: 'user_abc' }
-     * @deny (create) User with UID 'user_abc' cannot create an article with authorId 'user_def'.
-     *       Request: { auth.uid: 'user_abc', resource.data.authorId: 'user_def' }
-     * @deny (update, delete) User with UID 'user_abc' cannot modify/delete an article authored by 'user_def'.
-     *        Request: { auth.uid: 'user_abc', resource.data.authorId: 'user_def' }
-     * @principle Grants public read access but restricts writes to the article's author.
-     */
+    // Articles can be read by anyone
+    // Articles can only be created, updated, or deleted by the author
     match /articles/{articleId} {
-      // Allow anyone to read articles
-      allow get, list: if true;
-
-      // Allow the author to create an article, validating authorId
-      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-
-      // Allow the author to update/delete their own article, validating authorId and existence
-      allow update, delete: if isExistingOwner(resource.data.authorId);
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
-  }
-
-  // Helper functions
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  function isOwner(userId) {
-    return isSignedIn() && request.auth.uid == userId;
-  }
-
-  function isExistingOwner(userId) {
-    return isOwner(userId) && resource != null;
   }
 }

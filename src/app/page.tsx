@@ -6,40 +6,47 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2, PenSquare, User } from 'lucide-react';
 import ArticleCard from '@/components/article-card';
-import { getArticles, getAuthor, getImage } from '@/lib/data';
-import type { Article, User as Author } from '@/lib/data';
+import { getImage, User as Author } from '@/lib/data';
+import type { Article, UserProfile } from '@/lib/data';
 import { useAuth } from '@/hooks/use-auth';
 import { getPersonalizedArticleRecommendations } from '@/ai/flows/personalized-article-recommendations';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-
-const allArticles = getArticles();
-const allAuthors = allArticles.map(article => getAuthor(article.authorId)).filter(Boolean) as Author[];
+import { useFirebase, useCollection, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 
 function PersonalizedFeed() {
-  const { user, readingHistory } = useAuth();
+  const { user, userProfile } = useAuth();
   const [recommendations, setRecommendations] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { firestore } = useFirebase();
+  const articlesRef = useMemoFirebase(() => collection(firestore, 'articles'), [firestore]);
+  const { data: allArticles } = useCollection<Article>(articlesRef);
+
   useEffect(() => {
-    if (user && readingHistory.length > 0) {
+    if (user && userProfile && allArticles && userProfile.readingList && userProfile.readingList.length > 0) {
       setIsLoading(true);
       const fetchRecommendations = async () => {
         try {
-          const historyTitles = readingHistory
+          const historyTitles = userProfile.readingList
             .map(id => allArticles.find(a => a.id === id)?.title)
             .filter((t): t is string => !!t);
 
-          const result = await getPersonalizedArticleRecommendations({
-            readingHistory: historyTitles,
-            numberOfRecommendations: 3,
-          });
+          if (historyTitles.length > 0) {
+            const result = await getPersonalizedArticleRecommendations({
+              readingHistory: historyTitles,
+              numberOfRecommendations: 3,
+            });
 
-          const recommendedArticles = result.recommendations
-            .map(title => allArticles.find(a => a.title === title))
-            .filter((a): a is Article => !!a);
+            const recommendedArticles = result.recommendations
+              .map(title => allArticles.find(a => a.title === title))
+              .filter((a): a is Article => !!a);
 
-          setRecommendations(recommendedArticles);
+            setRecommendations(recommendedArticles);
+          } else {
+            setRecommendations([]);
+          }
         } catch (error) {
           console.error("Failed to fetch recommendations:", error);
         } finally {
@@ -49,8 +56,9 @@ function PersonalizedFeed() {
       fetchRecommendations();
     } else {
       setIsLoading(false);
+       setRecommendations([]);
     }
-  }, [user, readingHistory]);
+  }, [user, userProfile, allArticles]);
 
   if (!user) {
     return null;
@@ -85,7 +93,7 @@ function PersonalizedFeed() {
             <ArticleCard
                 key={article.id}
                 article={article}
-                author={getAuthor(article.authorId)}
+                authorId={article.authorId}
                 index={index}
             />
             ))}
@@ -137,20 +145,23 @@ function WriteArticleCta() {
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { firestore } = useFirebase();
+  const articlesRef = useMemoFirebase(() => collection(firestore, 'articles'), [firestore]);
+  const { data: allArticles, isLoading } = useCollection<Article>(articlesRef);
 
   const filteredArticles = useMemo(() => {
+    if (!allArticles) return [];
     if (!searchTerm) return allArticles;
     const lowercasedTerm = searchTerm.toLowerCase();
     return allArticles.filter(article => {
-      const author = getAuthor(article.authorId);
+      // We can't filter by author name client-side anymore without fetching all users
       return (
         article.title.toLowerCase().includes(lowercasedTerm) ||
         article.summary.toLowerCase().includes(lowercasedTerm) ||
-        (author && author.name.toLowerCase().includes(lowercasedTerm)) ||
         article.tags.some(tag => tag.toLowerCase().includes(lowercasedTerm))
       );
     });
-  }, [searchTerm]);
+  }, [searchTerm, allArticles]);
 
   return (
     <div className="py-6 md:py-10">
@@ -183,13 +194,17 @@ export default function Home() {
         <h2 className="font-headline text-2xl md:text-3xl mb-6">
           {searchTerm ? '검색 결과' : '모든 작품'}
         </h2>
-        {filteredArticles.length > 0 ? (
+        {isLoading ? (
+            <div className="text-center py-16">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+            </div>
+        ) : filteredArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredArticles.map((article, index) => (
               <ArticleCard
                 key={article.id}
                 article={article}
-                author={getAuthor(article.authorId)}
+                authorId={article.authorId}
                 index={index}
               />
             ))}
