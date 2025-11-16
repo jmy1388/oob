@@ -149,7 +149,7 @@ export default function Home() {
   
   const articlesQuery = useMemoFirebase(() => {
     const coll = collection(firestore, 'articles');
-    return query(coll, orderBy('likeCount', 'desc'));
+    return query(coll, orderBy('likeCount', 'asc'));
   }, [firestore]);
 
   const { data: allArticles, isLoading } = useCollection<Article>(articlesQuery);
@@ -204,7 +204,7 @@ export default function Home() {
                 <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
             </div>
         ) : filteredArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {filteredArticles.map((article, index) => (
               <ArticleCard
                 key={article.id}
