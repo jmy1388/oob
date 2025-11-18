@@ -4,15 +4,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import type { Article } from '@/lib/data';
-import { getImage } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Skeleton } from './ui/skeleton';
 import type { Timestamp } from 'firebase/firestore';
+import { User } from 'lucide-react';
 
 
 interface ArticleCardProps {
@@ -34,14 +34,12 @@ function AuthorDetails({ authorUsername, createdAt }: { authorUsername?: string,
         )
     }
     
-    const authorAvatar = getImage('user-1'); // Placeholder
     const date = createdAt.toDate();
 
     return (
         <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-                {authorAvatar && <AvatarImage src={authorAvatar.imageUrl} alt={authorUsername} data-ai-hint={authorAvatar.imageHint}/>}
-                <AvatarFallback>{authorUsername.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <Avatar className="h-10 w-10 bg-muted text-muted-foreground flex items-center justify-center">
+                <User className="h-5 w-5" />
             </Avatar>
             <div>
                 <p className="font-semibold text-sm">{authorUsername}</p>
@@ -54,43 +52,26 @@ function AuthorDetails({ authorUsername, createdAt }: { authorUsername?: string,
 }
 
 export default function ArticleCard({ article, authorUsername, index }: ArticleCardProps) {
-  const image = getImage(article.imageId);
 
   return (
     <Card
-      className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl animate-fade-in-up"
+      className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl animate-fade-in-up border-transparent shadow-none hover:bg-card"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <Link href={`/articles/${article.slug}`} className="block">
-        <CardHeader className="p-0">
-          <div className="relative aspect-[3/2] w-full">
-            {image && (
-              <Image
-                src={image.imageUrl}
-                alt={article.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                data-ai-hint={image.imageHint}
-              />
-            )}
-          </div>
-        </CardHeader>
-      </Link>
-      <CardContent className="flex-grow p-6">
-        <div className="flex gap-2 mb-2">
-            {article.tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="font-normal">{tag}</Badge>
-            ))}
-        </div>
+      <CardContent className="flex-grow p-4">
         <Link href={`/articles/${article.slug}`}>
-          <CardTitle className="font-headline text-xl leading-tight mb-2 hover:text-primary transition-colors">
+          <CardTitle className="font-headline text-lg leading-tight mb-2 hover:text-primary transition-colors line-clamp-2">
             {article.title}
           </CardTitle>
         </Link>
-        <p className="text-muted-foreground text-sm line-clamp-3">{article.summary}</p>
+        <p className="text-muted-foreground text-sm line-clamp-3 mb-3">{article.summary}</p>
+        <div className="flex flex-wrap gap-1">
+            {article.tags.slice(0, 2).map(tag => (
+                <Badge key={tag} variant="secondary" className="font-normal text-xs">{tag}</Badge>
+            ))}
+        </div>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
+      <CardFooter className="p-4 pt-0">
         <AuthorDetails authorUsername={authorUsername} createdAt={article.createdAt} />
       </CardFooter>
     </Card>

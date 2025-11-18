@@ -36,7 +36,7 @@ export default function Home() {
   const { firestore } = useFirebase();
 
   const articlesQuery = useMemoFirebase(
-    () => query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')),
+    () => query(collection(firestore, 'articles'), orderBy('createdAt', 'desc')),
     [firestore]
   );
   const { data: allArticles, isLoading } = useCollection<Article>(articlesQuery);
@@ -81,7 +81,7 @@ export default function Home() {
 
       <WriteArticleCta />
 
-      <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <h2 className="font-headline text-2xl md:text-3xl mb-6">
           {searchTerm ? '검색 결과' : '모든 작품'}
         </h2>
@@ -90,7 +90,7 @@ export default function Home() {
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
           </div>
         ) : filteredArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {filteredArticles.map((article, index) => (
               <ArticleCard
                 key={article.id}
