@@ -109,6 +109,11 @@ export default function Home() {
           </div>
         )}
       </div>
+      <footer className="mt-16 py-8 text-center text-xs text-muted-foreground">
+        <div className="container mx-auto">
+          <p>청소년에게 부적절한 내용을 게시할 경우, 법적 책임이 따릅니다. 신고: 사이버경찰청 ☎ 182</p>
+        </div>
+      </footer>
     </div>
   );
 }
