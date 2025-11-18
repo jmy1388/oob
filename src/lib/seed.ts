@@ -6,6 +6,16 @@ const createSlug = (title: string) => {
     return title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 };
 
+// Helper function to generate a random date within the last 14 days
+const randomDateInPastTwoWeeks = (): Date => {
+    const today = new Date();
+    const fourteenDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 14);
+    
+    const randomTime = fourteenDaysAgo.getTime() + Math.random() * (today.getTime() - fourteenDaysAgo.getTime());
+    
+    return new Date(randomTime);
+}
+
 export const articlesToSeed = [
     // 학업 관련 글 5개
     {
@@ -87,15 +97,11 @@ export const seedArticles = async (firestore: Firestore) => {
     const articlesCollection = collection(firestore, 'articles');
     const batch = writeBatch(firestore);
 
-    articlesToSeed.forEach((articleData, index) => {
+    articlesToSeed.forEach((articleData) => {
         const docRef = doc(articlesCollection); // Auto-generate ID
         const slug = createSlug(articleData.title);
         
-        // Generate a date based on the index: 1 day ago, 2 days ago, etc.
-        const articleDate = new Date();
-        articleDate.setDate(articleDate.getDate() - (index + 1));
-        articleDate.setHours(Math.floor(Math.random() * 24));
-        articleDate.setMinutes(Math.floor(Math.random() * 60));
+        const articleDate = randomDateInPastTwoWeeks();
 
         const newArticle = {
             ...articleData,
@@ -107,7 +113,7 @@ export const seedArticles = async (firestore: Firestore) => {
 
     try {
         await batch.commit();
-        console.log('Successfully seeded articles with sequential dates.');
+        console.log('Successfully seeded articles with random dates in the past two weeks.');
     } catch (error) {
         console.error('Error seeding articles:', error);
     }

@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFirebase } from '@/firebase';
-import { collection, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, query, deleteDoc } from 'firebase/firestore';
 import { seedArticles } from '@/lib/seed';
 
 // This component will run once on mount, check if articles exist,
@@ -13,35 +13,45 @@ export function SeedData() {
   const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
-    if (!firestore || isSeeding) {
+    if (!firestore) {
       return;
     }
 
     const checkAndSeedDatabase = async () => {
+      if (isSeeding) return;
+
       setIsSeeding(true);
       try {
-        console.log('Checking if database needs seeding...');
+        console.log('Force re-seeding database...');
         const articlesCollection = collection(firestore, 'articles');
-        const snapshot = await getDocs(articlesCollection);
-        
-        // Only seed if the collection is empty
-        if (snapshot.empty) {
-            console.log('Database is empty. Seeding with initial data...');
-            await seedArticles(firestore);
-            console.log('Database has been seeded.');
-        } else {
-            console.log('Database already contains data. Skipping seed.');
+        const q = query(articlesCollection);
+        const snapshot = await getDocs(q);
+
+        // Delete all existing documents in the articles collection
+        if (!snapshot.empty) {
+            console.log(`Deleting ${snapshot.size} existing articles...`);
+            const deleteBatch = writeBatch(firestore);
+            snapshot.docs.forEach(doc => {
+                deleteBatch.delete(doc.ref);
+            });
+            await deleteBatch.commit();
+            console.log('Existing articles deleted.');
         }
 
+        // Seed with new data
+        console.log('Seeding database with new initial data...');
+        await seedArticles(firestore);
+        console.log('Database has been re-seeded.');
+
       } catch (error) {
-        console.error('Error during database seed check:', error);
+        console.error('Error during database seed process:', error);
       } finally {
         setIsSeeding(false);
       }
     };
 
     checkAndSeedDatabase();
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firestore]);
 
   // This component does not render anything.
