@@ -23,16 +23,6 @@ export interface Article {
   likeCount: number;
 }
 
-export interface UserProfile {
-    id: string;
-    username: string;
-    email: string;
-    bio: string;
-    readingList: string[]; // array of article IDs
-    readingHistory: string[]; // array of article IDs
-}
-
-
 // Mock data is no longer the source of truth, but can be useful for placeholders or initial structure.
 // We will primarily fetch from Firestore.
 

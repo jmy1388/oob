@@ -9,10 +9,16 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Loader2 } from 'lucide-react';
-import { useFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { doc, increment, onSnapshot } from 'firebase/firestore';
+import { useFirebase } from '@/firebase';
+import { doc, increment, onSnapshot, updateDoc } from 'firebase/firestore';
 import type { Article } from '@/lib/data';
 import { getImage } from '@/lib/data';
+
+// A non-blocking update function for the client
+const updateDocumentNonBlocking = (docRef: any, data: any) => {
+    updateDoc(docRef, data).catch(err => console.error("Update failed", err));
+};
+
 
 // The Client Component that handles all interaction and rendering
 export default function ArticlePageContent({ article: initialArticle }: { article: Article }) {
