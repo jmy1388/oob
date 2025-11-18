@@ -84,7 +84,7 @@ export default function SubmitPage() {
                   <FormItem>
                     <FormLabel className="text-lg">필명</FormLabel>
                     <FormControl>
-                      <Input placeholder="작성자 이름" {...field} />
+                      <Input placeholder="작가의 이름이나 별명" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
