@@ -49,7 +49,7 @@ export function SeedData() {
     // to ensure date changes are always reflected.
     reseedDatabase();
 
-  }, [firestore, isSeeding]);
+  }, [firestore]);
 
   // This component does not render anything.
   return null;
