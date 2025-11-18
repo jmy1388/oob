@@ -105,7 +105,7 @@ const articlesToSeed: Omit<Article, 'id' | 'createdAt'>[] = [
     title: '좋은 대학 가는 것만이 정답일까?',
     summary: '모두가 좋은 대학을 목표로 달릴 때, 나는 잠시 멈춰서 다른 길은 없는지 둘러보기로 했다. 대학이 인생의 전부는 아니라고 믿는 나의 생각이다.',
     content:
-      '우리 사회는 좋은 대학에 가는 것을 성공의 유일한 척도처럼 이야기한다. 나도 그 길을 따라 열심히 공부했지만, 마음 한편에는 항상 의문이 있었다. 이게 정말 내가 원하는 삶일까?\n\n최근에는 대학 진학 대신, 1년 동안 세계 여행을 하거나, 직접 창업을 하는 사람들의 이야기를 많이 찾아봤다. 물론 두려운 마음도 크다. 하지만 남들이 정해놓은 길을 따라가는 것만이 정답은 아니라는 확신이 들었다. 나만의 속도로, 나만의 길을 만들어가는 것. 그것이 진정한 성공일지도 모른다.',
+      '우리 사회는 좋은 대학에 가는 것을 성공의 유일한 척도처럼 이야기한다. 나도 그 길을 따라 열심히 공부했지만, 마음 한편에는 항상 의문이 있었다. 이게 정말 내가 원하는 삶일까?\n\n최근에는 대학 진학 대신, 1년 동안 세계 여행을 하거나, 직접 창업을 하는 사람들의 이야기들을 많이 찾아봤다. 물론 두려운 마음도 크다. 하지만 남들이 정해놓은 길을 따라가는 것만이 정답은 아니라는 확신이 들었다. 나만의 속도로, 나만의 길을 만들어가는 것. 그것이 진정한 성공일지도 모른다.',
     slug: 'is-a-good-university-the-only-answer',
     imageId: `article-${Math.ceil(Math.random() * 7)}`,
     tags: ['진로', '대학', '인생'],
@@ -119,11 +119,11 @@ export async function seedArticles(db: Firestore) {
   // Check if there's any data already
   const snapshot = await getDocs(articlesCollection);
   if (!snapshot.empty) {
-    console.log('Database already seeded.');
+    // console.log('Database already seeded.');
     return; // Don't seed if data exists
   }
 
-  console.log('Seeding database with initial articles...');
+  // console.log('Seeding database with initial articles...');
 
   const batch = writeBatch(db);
 
@@ -137,5 +137,5 @@ export async function seedArticles(db: Firestore) {
 
   await batch.commit();
 
-  console.log('Database seeded successfully!');
+  // console.log('Database seeded successfully!');
 }
