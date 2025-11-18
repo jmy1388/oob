@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -18,7 +19,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Noto Sans KR', 'sans-serif'],
-        headline: ['Playfair Display', 'serif'],
+        headline: ['Noto Sans KR', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
