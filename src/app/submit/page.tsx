@@ -43,6 +43,10 @@ export default function SubmitPage() {
   });
 
   async function onSubmit(values: z.infer<typeof articleSchema>) {
+    if (!firestore) {
+        toast({ variant: 'destructive', title: '오류', description: '데이터베이스에 연결할 수 없습니다.' });
+        return;
+    }
     const articlesCollection = collection(firestore, 'articles');
     const slug = values.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
@@ -110,7 +114,7 @@ export default function SubmitPage() {
                   <FormItem>
                     <FormLabel className="text-lg">요약</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="기사에 대한 간략한 한 단락 요약." {...field} />
+                      <Textarea placeholder="글에 대한 간략한 소개" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
