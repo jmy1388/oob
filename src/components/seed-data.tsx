@@ -18,3 +18,5 @@ export default function SeedData() {
 
   return null; // This component doesn't render anything.
 }
+
+    

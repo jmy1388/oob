@@ -137,3 +137,5 @@ export async function seedArticles(db: Firestore) {
 
   console.log('Database seeded successfully!');
 }
+
+    
