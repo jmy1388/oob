@@ -6,6 +6,7 @@ import {
   getDocs,
   writeBatch,
   Timestamp,
+  doc,
 } from 'firebase/firestore';
 import type { Firestore } from 'firebase/firestore';
 import type { Article } from './data';
@@ -126,7 +127,7 @@ export async function seedArticles(db: Firestore) {
   const batch = writeBatch(db);
 
   for (const article of articlesToSeed) {
-    const docRef = collection(db, 'articles').doc();
+    const docRef = doc(collection(db, 'articles'));
     batch.set(docRef, {
       ...article,
       createdAt: randomDateInPastSevenDays(),
