@@ -1,8 +1,8 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,10 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Skeleton } from './ui/skeleton';
 import type { Timestamp } from 'firebase/firestore';
-import { User } from 'lucide-react';
+import { User, Heart } from 'lucide-react';
+import { useFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { doc, increment } from 'firebase/firestore';
+import { Button } from './ui/button';
 
 
 interface ArticleCardProps {
@@ -51,6 +54,46 @@ function AuthorDetails({ authorUsername, createdAt }: { authorUsername?: string,
     )
 }
 
+function LikeButton({ article }: { article: Article }) {
+    const { firestore } = useFirebase();
+    const [isLiked, setIsLiked] = useState(false);
+    const [localLikeCount, setLocalLikeCount] = useState(article.likeCount);
+
+    useEffect(() => {
+        const liked = localStorage.getItem(`liked_${article.id}`) === 'true';
+        setIsLiked(liked);
+    }, [article.id]);
+    
+    const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault(); // Prevent link navigation
+        e.stopPropagation(); // Prevent event bubbling
+        if (!firestore) return;
+
+        const articleRef = doc(firestore, 'articles', article.id);
+        const newLikedState = !isLiked;
+        const newLikeCount = newLikedState ? localLikeCount + 1 : localLikeCount -1;
+        
+        updateDocumentNonBlocking(articleRef, {
+            likeCount: increment(newLikedState ? 1 : -1)
+        });
+        
+        setIsLiked(newLikedState);
+        setLocalLikeCount(newLikeCount);
+        localStorage.setItem(`liked_${article.id}`, String(newLikedState));
+    }
+
+    return (
+        <div className="flex items-center gap-1.5">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleLikeClick}>
+                <Heart className={`h-4 w-4 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`} />
+            </Button>
+            <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                {localLikeCount}
+            </span>
+        </div>
+    );
+}
+
 export default function ArticleCard({ article, authorUsername, index }: ArticleCardProps) {
 
   return (
@@ -58,22 +101,23 @@ export default function ArticleCard({ article, authorUsername, index }: ArticleC
       className="flex flex-col overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl animate-fade-in-up border-transparent shadow-none hover:bg-card"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <CardContent className="flex-grow p-4">
-        <Link href={`/articles/${article.slug}`}>
-          <CardTitle className="font-headline text-lg leading-tight mb-2 hover:text-primary transition-colors line-clamp-2">
-            {article.title}
-          </CardTitle>
+        <Link href={`/articles/${article.slug}`} className="flex flex-col flex-grow">
+            <CardContent className="flex-grow p-4">
+                <CardTitle className="font-headline text-lg leading-tight mb-2 hover:text-primary transition-colors line-clamp-2">
+                    {article.title}
+                </CardTitle>
+                <p className="text-muted-foreground text-sm line-clamp-3 mb-3">{article.summary}</p>
+                <div className="flex flex-wrap gap-1">
+                    {article.tags.slice(0, 2).map(tag => (
+                        <Badge key={tag} variant="secondary" className="font-normal text-xs">{tag}</Badge>
+                    ))}
+                </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0 flex justify-between items-center">
+                <AuthorDetails authorUsername={authorUsername} createdAt={article.createdAt} />
+                <LikeButton article={article} />
+            </CardFooter>
         </Link>
-        <p className="text-muted-foreground text-sm line-clamp-3 mb-3">{article.summary}</p>
-        <div className="flex flex-wrap gap-1">
-            {article.tags.slice(0, 2).map(tag => (
-                <Badge key={tag} variant="secondary" className="font-normal text-xs">{tag}</Badge>
-            ))}
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <AuthorDetails authorUsername={authorUsername} createdAt={article.createdAt} />
-      </CardFooter>
     </Card>
   );
 }

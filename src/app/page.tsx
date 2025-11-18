@@ -36,7 +36,7 @@ export default function Home() {
   const { firestore } = useFirebase();
 
   const articlesQuery = useMemoFirebase(
-    () => query(collection(firestore, 'articles'), orderBy('createdAt', 'desc')),
+    () => query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')),
     [firestore]
   );
   const { data: allArticles, isLoading } = useCollection<Article>(articlesQuery);
@@ -83,7 +83,7 @@ export default function Home() {
 
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <h2 className="font-headline text-2xl md:text-3xl mb-6">
-          {searchTerm ? '검색 결과' : '모든 작품'}
+          {searchTerm ? '검색 결과' : '인기 작품'}
         </h2>
         {isLoading ? (
           <div className="text-center py-16">

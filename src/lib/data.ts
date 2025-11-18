@@ -1,6 +1,5 @@
-
-import { PlaceHolderImages, type ImagePlaceholder } from './placeholder-images';
 import type { Timestamp } from 'firebase/firestore';
+import { PlaceHolderImages, type ImagePlaceholder } from './placeholder-images';
 
 export interface Article {
   id:string;
