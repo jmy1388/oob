@@ -71,11 +71,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [isUserLoading, isProfileLoading, user]);
 
   const login = async (email: string, password?: string) => {
+    if (!auth) throw new Error("Auth service is not available.");
     if (!password) throw new Error("Password is required for email login.");
     await signInWithEmailAndPassword(auth, email, password);
   };
 
   const signup = async (name: string, email: string, password?: string) => {
+    if (!auth || !firestore) throw new Error("Firebase services are not available.");
     if (!password) throw new Error("Password is required for email signup.");
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
@@ -96,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
   
   const signInWithGoogle = async () => {
+    if (!auth || !firestore) throw new Error("Firebase services are not available.");
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const googleUser = result.user;
@@ -115,6 +118,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    if (!auth) throw new Error("Auth service is not available.");
     await signOut(auth);
   };
 
@@ -123,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [userProfile]);
 
   const toggleSaveArticle = useCallback((articleId: string) => {
-    if (!user || !userProfile) return;
+    if (!user || !userProfile || !firestore) return;
     
     const userProfileDocRef = doc(firestore, 'users', user.uid);
     const isCurrentlySaved = userProfile.readingList?.includes(articleId);
@@ -135,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, userProfile, firestore]);
   
   const addReadingHistory = useCallback((articleId: string) => {
-    if (!user || !userProfile) return;
+    if (!user || !userProfile || !firestore) return;
     
     const userProfileDocRef = doc(firestore, 'users', user.uid);
     // Add to history only if it's not already there
