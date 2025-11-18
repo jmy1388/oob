@@ -72,7 +72,7 @@ export default function SubmitPage() {
       <Card>
         <CardHeader>
           <CardTitle className="font-headline text-3xl">글쓰기</CardTitle>
-          <CardDescription>세상과 당신의 이야기를 공유하세요. 아래 양식을 작성하여 기사를 게시하세요.</CardDescription>
+          <CardDescription>당신의 이야기를 세상에 펼쳐보세요</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
