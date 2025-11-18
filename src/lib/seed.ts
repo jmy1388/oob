@@ -28,7 +28,6 @@ export const articlesToSeed = [
         tags: ['학업', '시험', '스트레스'],
         likeCount: 15,
         imageId: 'article-1', 
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '수포자',
@@ -38,7 +37,6 @@ export const articlesToSeed = [
         tags: ['학업', '수학', '고민'],
         likeCount: 22,
         imageId: 'article-2',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '암기왕이 되고 싶어',
@@ -48,7 +46,6 @@ export const articlesToSeed = [
         tags: ['학업', '암기', '공부법'],
         likeCount: 31,
         imageId: 'article-3',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '밤샘러',
@@ -58,7 +55,6 @@ export const articlesToSeed = [
         tags: ['학업', '시험', '수면'],
         likeCount: 18,
         imageId: 'article-4',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '프로계획러',
@@ -68,7 +64,6 @@ export const articlesToSeed = [
         tags: ['학업', '스터디플래너', '계획'],
         likeCount: 25,
         imageId: 'article-5',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     // 진로 관련 글 3개
     {
@@ -79,7 +74,6 @@ export const articlesToSeed = [
         tags: ['진로', '꿈', '고민'],
         likeCount: 42,
         imageId: 'article-6',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '현실주의자',
@@ -89,7 +83,6 @@ export const articlesToSeed = [
         tags: ['진로', '현실', '꿈'],
         likeCount: 55,
         imageId: 'article-7',
-        createdAt: randomDateInPastTwoWeeks(),
     },
     {
         authorUsername: '문과생',
@@ -99,7 +92,6 @@ export const articlesToSeed = [
         tags: ['진로', '문과', '이과', '고민'],
         likeCount: 38,
         imageId: 'article-1', // Re-using an image for variety
-        createdAt: randomDateInPastTwoWeeks(),
     },
 ];
 
@@ -112,6 +104,7 @@ export const seedArticles = async (firestore: Firestore) => {
         const slug = createSlug(articleData.title);
         const newArticle = {
             ...articleData,
+            createdAt: randomDateInPastTwoWeeks(), // Generate random date here
             slug: `${slug}-${docRef.id.substring(0, 5)}`, // Make slug unique
         };
         batch.set(docRef, newArticle);
