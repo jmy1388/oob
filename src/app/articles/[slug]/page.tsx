@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
-import { notFound, useParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -10,38 +9,105 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Heart, Loader2 } from 'lucide-react';
-import { useFirebase, useCollection, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { collection, query, where, doc, increment } from 'firebase/firestore';
+import { useFirebase, updateDocumentNonBlocking, initializeFirebase } from '@/firebase';
+import { collection, query, where, doc, increment, getDocs, getDoc } from 'firebase/firestore';
 import type { Article } from '@/lib/data';
 import { getImage } from '@/lib/data';
 
-export default function ArticlePage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  
-  const { firestore } = useFirebase();
+// This function is crucial for Next.js to know which dynamic pages to build at build time.
+// It fetches all articles and returns a list of slugs.
+export async function generateStaticParams() {
+  // We need a temporary, server-side instance of Firestore to fetch the slugs.
+  // This is safe to do here as this function only runs on the server at build time.
+  const { firestore } = initializeFirebase();
+  const articlesCollection = collection(firestore, 'articles');
+  const articlesSnapshot = await getDocs(articlesCollection);
+  const articles = articlesSnapshot.docs.map(doc => doc.data() as Article);
 
-  const articlesQuery = useMemoFirebase(() => query(collection(firestore, 'articles'), where('slug', '==', slug)), [firestore, slug]);
-  const { data: articles, isLoading: articlesLoading } = useCollection<Article>(articlesQuery);
-  const article = articles?.[0];
+  return articles.map((article) => ({
+    slug: article.slug,
+  }));
+}
 
-  const [isLiked, setIsLiked] = useState(false);
-  
-  useEffect(() => {
-    if (article) {
-      const liked = localStorage.getItem(`liked_${article.id}`) === 'true';
-      setIsLiked(liked);
+// Helper function to fetch a single article on the server
+async function getArticle(slug: string): Promise<Article | null> {
+    const { firestore } = initializeFirebase();
+    const articlesQuery = query(collection(firestore, 'articles'), where('slug', '==', slug));
+    const querySnapshot = await getDocs(articlesQuery);
+    
+    if (querySnapshot.empty) {
+        return null;
     }
-  }, [article]);
-  
-  if (articlesLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
-  }
+
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+
+    // Firestore Timestamps need to be converted for client-side usage
+    return {
+        ...data,
+        id: doc.id,
+        createdAt: {
+            seconds: data.createdAt.seconds,
+            nanoseconds: data.createdAt.nanoseconds,
+        }
+    } as Article;
+}
+
+// The main page component is now a Server Component
+export default async function ArticlePage({ params }: { params: { slug: string } }) {
+  const article = await getArticle(params.slug);
   
   if (!article) {
     notFound();
   }
 
+  // We pass the server-fetched data to the client component
+  return <ArticlePageContent article={article} />;
+}
+
+
+// The new Client Component that handles all interaction and rendering
+function ArticlePageContent({ article: initialArticle }: { article: Article }) {
+  const { firestore } = useFirebase();
+  const [article, setArticle] = useState(initialArticle);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Since we get initial data, we can re-hydrate the timestamp on the client
+  const date = useMemo(() => {
+    if (article.createdAt && typeof article.createdAt.seconds === 'number') {
+        // This is a Firestore Timestamp-like object from the server
+        return new Date(article.createdAt.seconds * 1000);
+    }
+    // Fallback for any other date format
+    return new Date(article.createdAt as any);
+  }, [article.createdAt]);
+
+  
+  useEffect(() => {
+    if (article) {
+      const liked = localStorage.getItem(`liked_${article.id}`) === 'true';
+      setIsLiked(liked);
+      
+      // We still need to listen for real-time updates for likeCount
+      const docRef = doc(firestore, 'articles', article.id);
+      const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if(docSnap.exists()){
+            const data = docSnap.data() as Article;
+            setArticle(prev => ({...prev, likeCount: data.likeCount }));
+        }
+      });
+      
+      setIsLoading(false);
+      return () => unsubscribe();
+
+    }
+  }, [article.id, firestore]);
+  
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-12 w-12 animate-spin text-primary" /></div>
+  }
+  
   const image = getImage(article.imageId);
   const authorAvatar = article.authorUsername ? getImage('user-1') : undefined; // Placeholder avatar logic
   
@@ -57,8 +123,6 @@ export default function ArticlePage() {
     setIsLiked(newLikedState);
     localStorage.setItem(`liked_${article.id}`, String(newLikedState));
   }
-
-  const date = article.createdAt.toDate();
 
   return (
     <article className="container max-w-3xl mx-auto py-8 md:py-12 px-4 sm:px-6">
