@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import ArticleCard from '@/components/article-card';
 import type { Article } from '@/lib/data';
@@ -10,6 +11,8 @@ import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 
 export default function Home() {
   const { firestore } = useFirebase();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q');
 
   const articlesQuery = useMemoFirebase(
     () => firestore ? query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')) : null,
@@ -28,6 +31,23 @@ export default function Home() {
         return article;
     })
   }, [allArticles]);
+  
+  const filteredArticles = useMemo(() => {
+    if (!searchQuery) {
+      return articlesWithDate;
+    }
+    return articlesWithDate?.filter(article => {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      const isMatch = 
+        article.title.toLowerCase().includes(lowerCaseQuery) ||
+        article.summary.toLowerCase().includes(lowerCaseQuery) ||
+        article.content.toLowerCase().includes(lowerCaseQuery) ||
+        (article.authorUsername && article.authorUsername.toLowerCase().includes(lowerCaseQuery)) ||
+        article.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery));
+      return isMatch;
+    });
+  }, [articlesWithDate, searchQuery]);
+
 
   return (
     <div className="py-6 md:py-10">
@@ -45,9 +65,9 @@ export default function Home() {
           <div className="text-center py-16">
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
           </div>
-        ) : articlesWithDate && articlesWithDate.length > 0 ? (
+        ) : filteredArticles && filteredArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {articlesWithDate.map((article, index) => (
+            {filteredArticles.map((article, index) => (
               <ArticleCard
                 key={article.id}
                 article={article}
@@ -58,7 +78,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="text-center py-16 bg-card rounded-lg">
-            <p className="text-muted-foreground text-lg">게시된 글이 없습니다.</p>
+            <p className="text-muted-foreground text-lg">{searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다.` : '게시된 글이 없습니다.'}</p>
           </div>
         )}
       </div>

@@ -1,28 +1,69 @@
 
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Logo from './logo';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Search, X } from 'lucide-react';
+import { Input } from './ui/input';
+import { cn } from '@/lib/utils';
 
 export default function Header() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery);
+    } else {
+      params.delete('q');
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
   
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center px-4 sm:px-6">
-        <div className="mr-4 flex">
+        <div className={cn('mr-4 flex transition-all duration-300', isSearchOpen ? 'opacity-0 pointer-events-none' : 'opacity-100')}>
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Logo />
           </Link>
         </div>
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-            <Button asChild variant="ghost">
+            {isSearchOpen && (
+              <form onSubmit={handleSearchSubmit} className="absolute left-0 w-full px-4 sm:px-6 flex items-center gap-2 animate-fade-in-up">
+                 <Search className="absolute left-7 sm:left-9 h-5 w-5 text-muted-foreground" />
+                 <Input 
+                    type="search"
+                    placeholder="제목, 내용, 작가 또는 태그로 검색"
+                    className="pl-10 w-full h-10 text-base rounded-md"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                 />
+                 <Button type="button" variant="ghost" size="icon" onClick={() => setIsSearchOpen(false)}>
+                    <X className="h-5 w-5"/>
+                 </Button>
+              </form>
+            )}
+
+            <Button asChild variant="ghost" className={cn(isSearchOpen ? 'opacity-0' : 'opacity-100')}>
               <Link href="/submit">
                 <PlusCircle className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">글쓰기</span>
               </Link>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(!isSearchOpen)} className={cn(isSearchOpen ? 'opacity-0' : 'opacity-100')}>
+                <Search className="h-5 w-5" />
+                <span className="sr-only">검색</span>
             </Button>
         </div>
       </div>
