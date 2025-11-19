@@ -102,7 +102,7 @@ export default function ArticleCard({ article, authorUsername, index }: ArticleC
       style={{ animationDelay: `${index * 100}ms` }}
     >
         {index === 0 && (
-          <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+          <div className="absolute top-0 left-0 -translate-x-1/4 -translate-y-1/4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
             인기
           </div>
         )}
