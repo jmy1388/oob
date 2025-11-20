@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Logo from './logo';
-import { PlusCircle, Search, X, Tags } from 'lucide-react';
+import { PlusCircle, Search, X } from 'lucide-react';
 import { Input } from './ui/input';
 import { cn } from '@/lib/utils';
 
@@ -62,12 +62,6 @@ export default function Header() {
             )}
 
             <div className={cn('flex items-center space-x-2 transition-opacity', isSearchOpen ? 'opacity-0' : 'opacity-100')}>
-                <Button asChild variant="ghost">
-                  <Link href="/keywords">
-                    <Tags className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">키워드</span>
-                  </Link>
-                </Button>
                 <Button asChild variant="ghost">
                   <Link href="/submit">
                     <PlusCircle className="h-4 w-4 sm:mr-2" />

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import ArticleCard from '@/components/article-card';
 import type { Article } from '@/lib/data';
@@ -23,12 +24,21 @@ export default function Home() {
   const searchQuery = searchParams.get('q');
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const [uniqueTags, setUniqueTags] = useState<string[]>([]);
 
   const articlesQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')) : null),
     [firestore]
   );
   const { data: allArticles, isLoading } = useCollection<Article>(articlesQuery);
+
+  useEffect(() => {
+    if (allArticles) {
+      const allTags = allArticles.flatMap(article => article.tags);
+      const uniqueTagSet = new Set(allTags);
+      setUniqueTags(Array.from(uniqueTagSet).sort());
+    }
+  }, [allArticles]);
 
   const articlesWithDate = useMemo(() => {
     return allArticles?.map(article => {
@@ -149,6 +159,33 @@ export default function Home() {
           </div>
         )}
       </div>
+      
+      <div className="container max-w-5xl mx-auto py-8 md:py-12 px-4 sm:px-6 mt-8">
+          <header className="text-center mb-8 md:mb-12">
+            <h2 className="font-headline text-2xl sm:text-3xl tracking-[0.3em] font-light text-foreground mb-2">
+              KEYWORD
+            </h2>
+          </header>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-48">
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+          ) : uniqueTags.length > 0 ? (
+            <div className="grid grid-cols-5 gap-0 border-t border-l border-border">
+              {uniqueTags.slice(0, 15).map(tag => (
+                <Link
+                  href={`/?q=${encodeURIComponent(tag)}`}
+                  key={tag}
+                  className="relative flex items-center justify-center h-24 p-4 border-b border-r border-border text-center text-foreground hover:bg-accent transition-colors"
+                >
+                  <span className="font-medium">{tag}</span>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+      </div>
+
+
       <footer className="mt-16 py-8 text-center text-xs text-muted-foreground">
         <div className="container mx-auto">
           <p>청소년에게 부적절한 내용을 게시할 경우, 법적 책임이 따릅니다. 신고: 사이버경찰청 ☎ 182</p>
