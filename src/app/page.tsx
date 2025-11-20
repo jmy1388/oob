@@ -124,7 +124,7 @@ export default function Home() {
             </Carousel>
             {api && (
               <div className="py-2 mt-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-4">
-                {api.scrollSnaps().map((_, index) => (
+                {api.scrollSnapList().map((_, index) => (
                   <button
                     key={index}
                     onClick={() => api.scrollTo(index)}
