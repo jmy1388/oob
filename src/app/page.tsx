@@ -119,8 +119,8 @@ export default function Home() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden" />
-              <CarouselNext className="hidden" />
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
             </Carousel>
             {api && (
               <div className="py-2 mt-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-4">
