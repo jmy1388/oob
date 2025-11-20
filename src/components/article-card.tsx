@@ -22,6 +22,7 @@ interface ArticleCardProps {
   article: Article;
   authorUsername?: string;
   index: number;
+  className?: string;
 }
 
 function AuthorDetails({ authorUsername, createdAt }: { authorUsername?: string, createdAt: Timestamp }) {
@@ -94,11 +95,14 @@ function LikeButton({ article }: { article: Article }) {
     );
 }
 
-export default function ArticleCard({ article, authorUsername, index }: ArticleCardProps) {
+export default function ArticleCard({ article, authorUsername, index, className }: ArticleCardProps) {
 
   return (
     <Card
-      className="relative flex flex-col overflow-visible transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl animate-fade-in-up border-transparent shadow-none hover:bg-card"
+      className={cn(
+        "relative flex flex-col overflow-visible transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl animate-fade-in-up border-transparent shadow-none hover:bg-card",
+        className
+      )}
       style={{ animationDelay: `${index * 100}ms` }}
     >
         {index === 0 && (

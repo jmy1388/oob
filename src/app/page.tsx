@@ -8,6 +8,13 @@ import ArticleCard from '@/components/article-card';
 import type { Article } from '@/lib/data';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 export default function Home() {
   const { firestore } = useFirebase();
@@ -15,30 +22,33 @@ export default function Home() {
   const searchQuery = searchParams.get('q');
 
   const articlesQuery = useMemoFirebase(
-    () => firestore ? query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')) : null,
+    () => (firestore ? query(collection(firestore, 'articles'), orderBy('likeCount', 'desc')) : null),
     [firestore]
   );
   const { data: allArticles, isLoading } = useCollection<Article>(articlesQuery);
 
   const articlesWithDate = useMemo(() => {
     return allArticles?.map(article => {
-        if (article.createdAt && typeof (article.createdAt as any).seconds === 'number') {
-            return {
-                ...article,
-                createdAt: new Timestamp((article.createdAt as any).seconds, (article.createdAt as any).nanoseconds)
-            }
-        }
-        return article;
-    })
+      if (article.createdAt && typeof (article.createdAt as any).seconds === 'number') {
+        return {
+          ...article,
+          createdAt: new Timestamp(
+            (article.createdAt as any).seconds,
+            (article.createdAt as any).nanoseconds
+          ),
+        };
+      }
+      return article;
+    });
   }, [allArticles]);
-  
+
   const filteredArticles = useMemo(() => {
     if (!searchQuery) {
       return articlesWithDate;
     }
     return articlesWithDate?.filter(article => {
       const lowerCaseQuery = searchQuery.toLowerCase();
-      const isMatch = 
+      const isMatch =
         article.title.toLowerCase().includes(lowerCaseQuery) ||
         article.summary.toLowerCase().includes(lowerCaseQuery) ||
         article.content.toLowerCase().includes(lowerCaseQuery) ||
@@ -47,7 +57,6 @@ export default function Home() {
       return isMatch;
     });
   }, [articlesWithDate, searchQuery]);
-
 
   return (
     <div className="py-6 md:py-10">
@@ -66,19 +75,34 @@ export default function Home() {
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
           </div>
         ) : filteredArticles && filteredArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {filteredArticles.map((article, index) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                authorUsername={article.authorUsername}
-                index={index}
-              />
-            ))}
-          </div>
+          <Carousel
+            opts={{
+              align: 'start',
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {filteredArticles.map((article, index) => (
+                <CarouselItem key={article.id} className="basis-full md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1 h-full">
+                    <ArticleCard
+                      article={article}
+                      authorUsername={article.authorUsername}
+                      index={index}
+                      className="h-full"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden sm:flex" />
+            <CarouselNext className="hidden sm:flex" />
+          </Carousel>
         ) : (
           <div className="text-center py-16 bg-card rounded-lg">
-            <p className="text-muted-foreground text-lg">{searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다.` : '게시된 글이 없습니다.'}</p>
+            <p className="text-muted-foreground text-lg">
+              {searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다.` : '게시된 글이 없습니다.'}
+            </p>
           </div>
         )}
       </div>
