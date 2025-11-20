@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Logo from './logo';
 import { PlusCircle, Search, X } from 'lucide-react';
@@ -12,7 +13,6 @@ import { cn } from '@/lib/utils';
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
@@ -24,14 +24,8 @@ export default function Header() {
     } else {
       params.delete('q');
     }
-    // Redirect to home page for searching
+    // Always navigate to the home page for searching
     router.push(`/?${params.toString()}`);
-     if(pathname !== '/') {
-        // If we are not on the homepage, a search action should navigate to the homepage.
-        // We use window.location to force a full page reload which will pick up the new query param.
-        // This is not ideal, but it's the simplest way to handle this for now.
-        window.location.href = `/?${params.toString()}`;
-    }
   };
   
   return (
@@ -78,3 +72,4 @@ export default function Header() {
     </header>
   );
 }
+
