@@ -3,9 +3,7 @@
 
 import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import Logo from './logo';
-import { PlusCircle, Search } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import SearchInput from './search-input';
 
