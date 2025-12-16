@@ -12,13 +12,14 @@ export type ImagePlaceholder = {
 export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
 
 export interface Article {
-  id:string;
+  id: string;
   slug: string;
   title: string;
   summary: string;
   content: string;
   imageId: string;
   authorUsername?: string;
+  authorId?: string;
   createdAt: Timestamp;
   tags: string[];
   likeCount: number;
@@ -28,5 +29,5 @@ export interface Article {
 // We will primarily fetch from Firestore.
 
 export const getImage = (id: string): ImagePlaceholder | undefined => {
-    return PlaceHolderImages.find(img => img.id === id);
+  return PlaceHolderImages.find(img => img.id === id);
 }

@@ -201,7 +201,7 @@ const articlesToSeed: Omit<Article, 'id' | 'createdAt'>[] = [
   },
 ];
 
-export async function seedArticles(db: Firestore) {
+export async function seedArticles(db: Firestore, userId: string) {
   const articlesCollection = collection(db, 'articles');
 
   // Check if there's any data already
@@ -219,6 +219,7 @@ export async function seedArticles(db: Firestore) {
     const docRef = doc(collection(db, 'articles'));
     batch.set(docRef, {
       ...article,
+      authorId: userId,
       createdAt: randomDateInPastSevenDays(),
     });
   }

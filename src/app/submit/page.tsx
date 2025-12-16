@@ -8,6 +8,7 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,7 +37,7 @@ export default function SubmitPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { firestore } = useFirebase();
-  
+
   const form = useForm<z.infer<typeof articleSchema>>({
     resolver: zodResolver(articleSchema),
     defaultValues: { authorUsername: '', title: '', summary: '', content: '', tags: '' },
@@ -44,30 +45,41 @@ export default function SubmitPage() {
 
   async function onSubmit(values: z.infer<typeof articleSchema>) {
     if (!firestore) {
-        toast({ variant: 'destructive', title: '오류', description: '데이터베이스에 연결할 수 없습니다.' });
-        return;
+      toast({ variant: 'destructive', title: '오류', description: '데이터베이스에 연결할 수 없습니다.' });
+      return;
     }
     const articlesCollection = collection(firestore, 'articles');
     const slug = values.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
 
+    // Get auth instance to attach authorId
+    const auth = getAuth(firestore.app);
+
+    // Create the article object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newArticle: any = {
+      ...values,
+      imageId: `article-${Math.ceil(Math.random() * 5)}`,
+      tags: values.tags.split(',').map(tag => tag.trim()),
+      slug: slug,
+      createdAt: serverTimestamp(),
+      likeCount: 0,
+    };
+
+    // Attach authorId if user is authenticated (including anonymous)
+    if (auth.currentUser) {
+      newArticle.authorId = auth.currentUser.uid;
+    }
+
     try {
-        const newArticle = {
-            ...values,
-            imageId: `article-${Math.ceil(Math.random() * 5)}`,
-            tags: values.tags.split(',').map(tag => tag.trim()),
-            slug: slug,
-            createdAt: serverTimestamp(),
-            likeCount: 0,
-        };
-        addDocumentNonBlocking(articlesCollection, newArticle);
-        
-        toast({ title: '기사 제출됨!', description: '기사가 게시되었습니다.' });
-        
-        router.push(`/articles/${slug}`);
+      addDocumentNonBlocking(articlesCollection, newArticle);
+
+      toast({ title: '기사 제출됨!', description: '기사가 게시되었습니다.' });
+
+      router.push(`/articles/${slug}`);
 
     } catch (error) {
-        console.error("Error submitting article:", error);
-        toast({ variant: 'destructive', title: '오류', description: '기사를 제출하는 중에 오류가 발생했습니다.' });
+      console.error("Error submitting article:", error);
+      toast({ variant: 'destructive', title: '오류', description: '기사를 제출하는 중에 오류가 발생했습니다.' });
     }
   }
 
@@ -81,7 +93,7 @@ export default function SubmitPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-               <FormField
+              <FormField
                 control={form.control}
                 name="authorUsername"
                 render={({ field }) => (
@@ -142,9 +154,9 @@ export default function SubmitPage() {
                     <FormControl>
                       <Input placeholder="예시: 기술, 철학, 예술" {...field} />
                     </FormControl>
-                     <p className="text-sm text-muted-foreground">
-                        원하는 태그를 쉼표로 구분하세요
-                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      원하는 태그를 쉼표로 구분하세요
+                    </p>
                     <FormMessage />
                   </FormItem>
                 )}

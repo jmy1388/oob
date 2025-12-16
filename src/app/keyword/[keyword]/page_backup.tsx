@@ -2,11 +2,14 @@
 
 // src/app/keyword/[keyword]/page.tsx
 
+// Force dynamic rendering to prevent hydration mismatch
+// Force dynamic rendering logic handled by usage of client hooks
+
 import { useParams } from 'next/navigation';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import type { Article } from '@/lib/data';
-import { Loader2, Heart } from 'lucide-react';
+import { Loader2, Heart, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -71,15 +74,11 @@ function ArticleListItem({ article }: { article: Article }) {
 
 export default function KeywordPage() {
     const params = useParams();
-    // Safely decode the keyword
-    const keyword = typeof params.keyword === 'string'
-        ? decodeURIComponent(params.keyword)
-        : '';
-
+    const keyword = decodeURIComponent(params.keyword as string);
     const { firestore } = useFirebase();
 
     const articlesQuery = useMemoFirebase(
-        () => firestore && keyword
+        () => firestore
             ? query(
                 collection(firestore, 'articles'),
                 where('tags', 'array-contains', keyword),
@@ -115,17 +114,9 @@ export default function KeywordPage() {
                         '{keyword}' 태그가 포함된 글이 없습니다.
                     </p>
                     {error && (
-                        <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-left">
-                            <p className="font-bold text-destructive mb-1">오류가 발생했습니다</p>
-                            <p className="text-sm text-destructive font-mono break-all">
-                                {error.message}
-                            </p>
-                            {(error as any).code && (
-                                <p className="text-xs text-muted-foreground mt-2">
-                                    Code: {(error as any).code}
-                                </p>
-                            )}
-                        </div>
+                        <p className="text-xs text-muted-foreground mt-2 opacity-50">
+                            (데이터를 불러오는 중 문제가 발생했습니다)
+                        </p>
                     )}
                     <Button asChild variant="link" className="mt-4">
                         <Link href="/">

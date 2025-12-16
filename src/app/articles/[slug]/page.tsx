@@ -5,17 +5,51 @@
 // ✅ [핵심] 빌드 시점에 미리 페이지를 만들지 않도록 강제합니다. (배포 오류 해결)
 export const dynamic = 'force-dynamic';
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { useArticleDetail } from '@/hooks/useArticles';
 import { Loader2 } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useFirebase } from '@/firebase';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ArticlePage() {
-  // URL에서 글 ID(slug)를 가져옵니다.
   const params = useParams();
+  const router = useRouter();
+  const { toast } = useToast();
   const slug = params?.slug as string;
   const { article, loading } = useArticleDetail(slug);
+
+  const { firestore, auth } = useFirebase();
+  const [user, setUser] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (auth) {
+      const unsub = onAuthStateChanged(auth, setUser);
+      return () => unsub();
+    }
+  }, [auth]);
+
+  const handleDelete = async () => {
+    if (!article || !firestore || !user) return;
+    if (!confirm('정말로 이 글을 삭제하시겠습니까?')) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteDoc(doc(firestore, 'articles', article.id));
+      toast({ title: '삭제 완료', description: '글이 삭제되었습니다.' });
+      router.push('/');
+    } catch (error) {
+      console.error('Delete failed', error);
+      toast({ variant: 'destructive', title: '삭제 실패', description: '권한이 없거나 오류가 발생했습니다.' });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // 로딩 중일 때 표시
   if (loading) {
@@ -57,6 +91,26 @@ export default function ArticlePage() {
             <span>✍️</span>
             {article.authorUsername || '익명'}
           </span>
+          {user && user.uid === article.authorId && (
+            <div className="flex gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '삭제 중...' : '삭제하기'}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* TEMPORARY DEBUG INFO */}
+        <div className="mt-2 p-2 bg-slate-100 text-xs text-slate-500 rounded font-mono">
+          <p>DEBUG INFO (나중에 지울 예정):</p>
+          <p>My UID: {user ? user.uid : 'Not logged in'}</p>
+          <p>Author ID: {article.authorId || 'None'}</p>
+          <p>Match?: {user && user.uid === article.authorId ? 'YES' : 'NO'}</p>
         </div>
       </header>
 
