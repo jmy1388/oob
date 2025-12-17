@@ -10,7 +10,6 @@ import { Loader2, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -50,11 +49,6 @@ function ArticleListItem({ article }: { article: Article }) {
                     </div>
 
                     <div className="flex items-center gap-3 text-sm text-muted-foreground mt-auto pt-4">
-                        <span className="font-medium text-foreground flex items-center gap-1.5">
-                            <User className="h-3.5 w-3.5" />
-                            {article.authorUsername || '익명'}
-                        </span>
-                        <span className="text-border">|</span>
                         <span>{format(date, 'yyyy.MM.dd', { locale: ko })}</span>
                         <span className="text-border">|</span>
                         <span className="flex items-center gap-1">

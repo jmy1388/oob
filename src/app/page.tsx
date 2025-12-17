@@ -114,7 +114,6 @@ function HomeContent() {
                     <div className="p-1 h-full">
                       <ArticleCard
                         article={article}
-                        authorUsername={article.authorUsername}
                         index={index}
                         className="h-full"
                       />
