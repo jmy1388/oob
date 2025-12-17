@@ -87,10 +87,7 @@ export default function ArticlePage() {
           {article.title}
         </h1>
         <div className="flex items-center justify-between text-muted-foreground text-sm">
-          <span className="font-medium flex items-center gap-2">
-            <span>✍️</span>
-            {article.authorUsername || '익명'}
-          </span>
+
           {user && user.uid === article.authorId && (
             <div className="flex gap-2">
               <Button
