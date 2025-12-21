@@ -129,7 +129,15 @@ export default function ArticlePageContent({ article: initialArticle }: { articl
       </div>
 
       <div className="mt-12 border-t pt-8">
-        {/* Author section removed */}
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-muted-foreground"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+          </div>
+          <div>
+            <p className="font-semibold">{article.authorUsername || "익명 작가"}</p>
+            <p className="text-sm text-muted-foreground">{format(date, 'yyyy.MM.dd', { locale: ko })}</p>
+          </div>
+        </div>
       </div>
     </article>
   );

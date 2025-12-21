@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import type { Article } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import { useFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { doc, increment } from 'firebase/firestore';
 import { Button } from './ui/button';
@@ -87,7 +89,21 @@ export default function ArticleCard({ article, index, className }: ArticleCardPr
                     </div>
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                    <div className="flex-1" />
+                    <div className="flex flex-col">
+                        <span className="text-sm font-medium">{article.authorUsername || "익명"}</span>
+                        <span className="text-xs text-muted-foreground">
+                            {(() => {
+                                try {
+                                    if (article.createdAt && typeof (article.createdAt as any).seconds === 'number') {
+                                        return format(new Date((article.createdAt as any).seconds * 1000), 'yy.MM.dd', { locale: ko });
+                                    }
+                                    return format(new Date(article.createdAt as any), 'yy.MM.dd', { locale: ko });
+                                } catch (e) {
+                                    return '';
+                                }
+                            })()}
+                        </span>
+                    </div>
                     <LikeButton article={article} />
                 </CardFooter>
             </Link>
